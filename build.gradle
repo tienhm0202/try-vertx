@@ -1,7 +1,7 @@
 plugins {
-  id 'java'
-  id 'application'
-  id 'com.github.johnrengelman.shadow' version '5.0.0'
+    id 'java'
+    id 'groovy'
+    id 'application'
 }
 
 group = 'me.tienhm'
@@ -17,7 +17,7 @@ ext {
 }
 
 application {
-  mainClassName = 'io.vertx.core.Launcher'
+  mainClassName = 'me.tienhm.eway_workshop.Runner'
 }
 
 sourceCompatibility = '1.8'
@@ -27,18 +27,10 @@ def watchForChange = 'src/**/*'
 def doOnChange = './gradlew classes'
 
 dependencies {
-  implementation "io.vertx:vertx-web:$vertxVersion"
-}
-
-
-shadowJar {
-  classifier = 'fat'
-  manifest {
-    attributes 'Main-Verticle': mainVerticleName
-  }
-  mergeServiceFiles {
-    include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
-  }
+    implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.3'
+    implementation group: "io.vertx", name: "vertx-web", version: "$vertxVersion"
+    implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
 }
 
 test {
