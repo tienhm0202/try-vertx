@@ -4,28 +4,27 @@ import groovy.util.logging.Slf4j
 import io.vertx.core.Handler
 import io.vertx.core.eventbus.DeliveryOptions
 import io.vertx.ext.web.RoutingContext
-import org.slf4j.MDC
 
 
 /**
- *
+ * Add request tracing via RoutingContext
  */
 @Slf4j
 class ContextTracing implements Handler<RoutingContext> {
-    static final String SPAN_ID_HEADER = "X-B3-SpanId"
-    static final String TRACE_ID_HEADER = "X-B3-TraceId"
 
     @Override
     final void handle(RoutingContext context) {
         log.warn("ContextTracing running ...")
-        String spanId = getRequestInfo(context, SPAN_ID_HEADER)
-        String traceId = getRequestInfo(context, TRACE_ID_HEADER)
-        updateMDC(spanId, traceId)
+        String spanId = getRequestInfo(context, Tracer.SPAN_ID_HEADER)
+        String traceId = getRequestInfo(context, Tracer.TRACE_ID_HEADER)
+        Tracer.updateMDC(spanId, traceId)
 
         // Update context metadata, to work with pub - sub architect
-        context.put(SPAN_ID_HEADER, spanId)
-        context.put(TRACE_ID_HEADER, traceId)
-        context.response().headers().add(TRACE_ID_HEADER, traceId)
+        context.put(Tracer.SPAN_ID_HEADER, spanId)
+        context.put(Tracer.TRACE_ID_HEADER, traceId)
+
+        // Add TraceID into response header. Should be configurable
+        context.response().headers().add(Tracer.TRACE_ID_HEADER, traceId)
         context.next()
     }
 
@@ -35,7 +34,7 @@ class ContextTracing implements Handler<RoutingContext> {
     private static String getRequestInfo(RoutingContext context, String key) {
         String requestInfo = context.request().headers().get(key)
         if (requestInfo.is(null) || requestInfo.isEmpty()) {
-            return Utils.nextId()
+            return Tracer.nextId()
         }
         return requestInfo
     }
@@ -44,16 +43,10 @@ class ContextTracing implements Handler<RoutingContext> {
         return new ContextTracing()
     }
 
-    private static void updateMDC(String spanId, String traceId) {
-        // Update MDC logger
-        MDC.put(SPAN_ID_HEADER, spanId)
-        MDC.put(TRACE_ID_HEADER, traceId)
-    }
-
     final static DeliveryOptions genTracingOptions(RoutingContext context) {
         DeliveryOptions options = new DeliveryOptions()
-        options.addHeader(SPAN_ID_HEADER, context.get(SPAN_ID_HEADER).toString())
-        options.addHeader(TRACE_ID_HEADER, context.get(TRACE_ID_HEADER).toString())
+        options.addHeader(Tracer.SPAN_ID_HEADER, context.get(Tracer.SPAN_ID_HEADER).toString())
+        options.addHeader(Tracer.TRACE_ID_HEADER, context.get(Tracer.TRACE_ID_HEADER).toString())
         return options
     }
 }
