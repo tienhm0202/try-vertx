@@ -7,7 +7,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import me.tienhm.eway_workshop.controllers.CandidateController
-import me.tienhm.eway_workshop.tracing.ContextTracing
+import me.tienhm.eway_workshop.tracing.RoutingHandler
 
 class AdminVerticle extends AbstractVerticle {
     private HttpServer server
@@ -16,7 +16,7 @@ class AdminVerticle extends AbstractVerticle {
     void start(Promise<Void> startPromise) throws Exception {
         Router router = Router.router(vertx)
         router.route().handler(BodyHandler.create())
-        router.route().handler(ContextTracing.create())
+        router.route().handler(RoutingHandler.create())
 
         // Candidates
         router.get("/candidates/").handler({context -> CandidateController.listCandidates(context)})

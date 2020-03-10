@@ -1,5 +1,6 @@
-package me.tienhm.eway_workshop.tracing
+package me.tienhm.eway_workshop.tracing.tracers
 
+import io.vertx.core.eventbus.DeliveryOptions
 import org.slf4j.MDC
 
 import java.util.concurrent.ThreadLocalRandom
@@ -31,5 +32,25 @@ class Tracer {
         // Update MDC logger
         MDC.put(SPAN_ID_HEADER, spanId)
         MDC.put(TRACE_ID_HEADER, traceId)
+    }
+
+    /**
+     * Generate DeliveryOptions with tracing info. Use to generate message headers before sending to
+     * event bus
+     * @return
+     */
+    static DeliveryOptions genTracingDeliveryOptions() {
+        DeliveryOptions options = new DeliveryOptions()
+        options.addHeader(SPAN_ID_HEADER, getCurrentSpanId())
+        options.addHeader(TRACE_ID_HEADER, getCurrentTraceId())
+        return options
+    }
+
+    static String getCurrentSpanId() {
+        return MDC.get(SPAN_ID_HEADER)
+    }
+
+    static String getCurrentTraceId() {
+        return MDC.get(TRACE_ID_HEADER)
     }
 }

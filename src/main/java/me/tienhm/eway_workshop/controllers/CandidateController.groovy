@@ -4,7 +4,7 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.ext.web.RoutingContext;
 import me.tienhm.eway_workshop.DB;
 import groovy.util.logging.Slf4j
-import me.tienhm.eway_workshop.tracing.ContextTracing
+import me.tienhm.eway_workshop.tracing.tracers.RoutingTracer
 
 @Slf4j
 class CandidateController {
@@ -20,7 +20,7 @@ class CandidateController {
         if (!DB.getCandidateByName(candidateName).equals("candidate not found")) {
             context.response().setStatusCode(200).end(DB.getCandidateByName(candidateName));
         }
-        queue.publish("candidates.add", candidateName, ContextTracing.genTracingOptions(context));
+        queue.publish("candidates.add", candidateName, RoutingTracer.genTracingDeliveryOptions());
         context.response().setStatusCode(202).end("accepted");
     }
 }

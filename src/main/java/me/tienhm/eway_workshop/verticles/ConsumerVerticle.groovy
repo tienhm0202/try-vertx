@@ -5,7 +5,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus
 import me.tienhm.eway_workshop.controllers.ConsumerController
-import me.tienhm.eway_workshop.tracing.VertxTracing
+import me.tienhm.eway_workshop.tracing.ConsumerHandler
 
 class ConsumerVerticle extends AbstractVerticle {
 
@@ -13,7 +13,7 @@ class ConsumerVerticle extends AbstractVerticle {
     void start(Promise<Void> startPromise) throws Exception {
         EventBus queue = vertx.eventBus()
 
-        queue.addInboundInterceptor(VertxTracing.create())
+        queue.addInboundInterceptor(ConsumerHandler.create())
 
         queue.consumer("candidates.add")
                 .handler({message -> ConsumerController.addCandidate(message)})
